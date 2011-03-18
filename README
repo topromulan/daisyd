@@ -1,0 +1,7 @@
+put your cert & key in 'pem'
+
+cat pem | ./daisyd
+
+basically works with bugs, look out for orphaned & spinning processes if testing.
+
+
