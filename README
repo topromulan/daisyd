@@ -2,6 +2,8 @@ put your cert & key in 'pem'
 
 cat pem | ./daisyd
 
-basically works with bugs, look out for orphaned & spinning processes if testing.
+this is currently hard coded to listen on :5000 and proxy to httpd on localhost at 127.128.129.1:80. it probably only works on intel & Linux.
 
+by works i mean basically works with bugs, look out for orphaned & spinning processes if testing :)
 
+POA structure & clean up, maybe add redirect rewrite.
