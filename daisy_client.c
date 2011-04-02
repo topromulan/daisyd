@@ -3,12 +3,6 @@
 #include "daisy.h"
 #include "err.h"
 
-//extern X509 *sslcertificate;
-//extern EVP_PKEY *sslkey;
-
-//extern SSL_CTX *ssl_ctx;
-
-
 inline void daisy_client(int c_fd) {
 	
 	/* Client/Server pair */
@@ -67,22 +61,31 @@ inline void daisy_client(int c_fd) {
 
         for(;;) {
                 if ( -1 == poll((struct pollfd *)&CS, (nfds_t)2, 1000))
-                        err("poll returned error");
+                        err("poll error?");
 
                 if(CS.C.revents == POLLIN) {
                         /* ssl read */
                         n = SSL_read(clientssl, framebuffer, READLEN);
 
+			if (n == 0)
+				break;
+
 			/* plain write */
                         send(CS.S.fd, framebuffer, n, 0);
                 }
+
                 if(CS.S.revents == POLLIN) {
 			/* plain read */
                         n = recv(CS.S.fd, framebuffer, READLEN, 0);
 
+			if (n == 0)
+				break;
+
                         /* ssl write */
                         SSL_write(clientssl, framebuffer, n);
                 }
+
+		sleep(1);
         }
 
         syslog(LOG_NOTICE, "client disconnect.");
