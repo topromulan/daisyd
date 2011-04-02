@@ -84,8 +84,6 @@ inline void daisy_client(int c_fd) {
                         /* ssl write */
                         SSL_write(clientssl, framebuffer, n);
                 }
-
-		sleep(1);
         }
 
         syslog(LOG_NOTICE, "client disconnect.");
