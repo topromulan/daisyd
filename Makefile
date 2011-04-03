@@ -3,7 +3,7 @@ CC=gcc
 CFLAGS=-Wall -g 
 LDFLAGS=-lcrypto -lssl
 
-daisyd: daisyd.o daisy.o daisy_client.o err.o
+daisyd: daisyd.o daisy.o daisy_client.o daisy_catch_sigchld.o err.o
 
 
 

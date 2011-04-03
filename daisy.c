@@ -2,10 +2,6 @@
 #include "daisy.h"
 #include "err.h"
 
-
-/* Write a signal handler to set stop and break the loop */
-//char SERVER_GO = 0;
-
 EVP_PKEY *ssl_key = NULL;
 X509 *ssl_certificate = NULL;
 
@@ -77,7 +73,8 @@ int daisybusinessmodel(void) {
 		c = accept(s, NULL, NULL);
 
 		if ( c < 0 ) {
-			syslog(LOG_NOTICE, "hmm");
+			/* Looks like this happens sometimes when children die.
+				accept -> -1. Interrupted system call. */
 			continue;
 		} else if ( ! fork() ) {
 			/* -- CHILD -- */

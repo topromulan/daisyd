@@ -67,8 +67,10 @@ inline void daisy_client(int c_fd) {
                         /* ssl read */
                         n = SSL_read(clientssl, framebuffer, READLEN);
 
-			if (n == 0)
+			if (n == 0) {
+				syslog(LOG_INFO, "client n was 0");
 				break;
+			}
 
 			/* plain write */
                         send(CS.S.fd, framebuffer, n, 0);
@@ -78,8 +80,10 @@ inline void daisy_client(int c_fd) {
 			/* plain read */
                         n = recv(CS.S.fd, framebuffer, READLEN, 0);
 
-			if (n == 0)
+			if (n == 0) {
+				syslog(LOG_INFO, "server n was 0");
 				break;
+			}
 
                         /* ssl write */
                         SSL_write(clientssl, framebuffer, n);
@@ -89,7 +93,5 @@ inline void daisy_client(int c_fd) {
         syslog(LOG_NOTICE, "client disconnect.");
         close(c_fd);
         close(p_fd);
-
-        sleep(5);
 
 }
