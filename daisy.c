@@ -13,8 +13,7 @@ int daisybusinessmodel(void) {
 	int s;
 	struct sockaddr_in saddr;
 
-
-	/* For a client side socket information */
+	/* Client socket information */
 	int c;
 
 	/* The standard input to get the certificate read from */
@@ -47,7 +46,7 @@ int daisybusinessmodel(void) {
 		err("cert/key trouble");
 	syslog(LOG_NOTICE, "No cert/key trouble.");
 
-	/* A server socket gets ready for some secure listening.. */
+	/* server SSL setup */
 
 	if ( ! ( ssl_ctx = SSL_CTX_new(SSLv23_server_method() ) ) ) 
 		err("Trouble initializing the server SSL context.");
@@ -56,6 +55,8 @@ int daisybusinessmodel(void) {
 	assert(SSL_CTX_use_certificate(ssl_ctx, ssl_certificate));
 	assert(SSL_CTX_use_PrivateKey(ssl_ctx, ssl_key));
 	syslog(LOG_DEBUG, "The context is use certificate.");
+
+	/* Listener setup */
 
 	s = socket(AF_INET, SOCK_STREAM, 0);
 
