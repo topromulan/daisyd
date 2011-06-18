@@ -1,14 +1,10 @@
-a simple proof-of-concept kind of ssl terminating proxy which was the last homework from an openssl class.
+simple forking ssl terminating proxy which was the last homework from an openssl class.
 
 put your cert & key in 'pem'
 
 cat pem | ./daisyd
 
-this is still hard coded to listen on *:5000 and proxy to an httpd on localhost at 127.128.129.1:80. 
+hard coded to listen on *:5000 and proxy to an httpd on localhost at 127.128.129.1:80. 
 
-it probably only works on Intel & Linux, and assuming a pretty loose definition of works! seems to go terribly wrong somehow under much load.
-
-if time i'll make it handle redirect rewrites and do something smarter than fork every client.
-
-
+it probably only works on Intel & Linux, and assuming a pretty loose definition of works! seems to go terribly wrong somehow under much load. just a proof of concept.
 
