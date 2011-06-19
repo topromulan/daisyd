@@ -1,4 +1,4 @@
 
 
-void catch_sigchld(void);
+void sigchld_handling(void);
 

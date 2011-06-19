@@ -11,7 +11,7 @@ int main(void) {
 
         syslog(LOG_NOTICE, "daisyd");
 
-	catch_sigchld();
+	sigchld_handling();
 
 	return fork() ? 0 : daisybusinessmodel() ;
 

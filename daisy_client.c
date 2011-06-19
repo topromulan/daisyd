@@ -22,7 +22,7 @@ inline void daisy_client(int c_fd) {
 	char framebuffer[FRAMEBUFFER];
 	int n;
 
-        syslog(LOG_DEBUG, "Daisy client.");
+        //syslog(LOG_DEBUG, "Daisy client.");
 
         clientBIO = BIO_new_socket(c_fd, BIO_NOCLOSE);
 
@@ -32,7 +32,7 @@ inline void daisy_client(int c_fd) {
         /* SSL_R_READ_BIO_NOT_SET             211 */
         SSL_set_bio(clientssl, clientBIO, clientBIO);
 
-        syslog(LOG_INFO, "Client trying to accept SSL.");
+        //syslog(LOG_INFO, "Client trying to accept SSL.");
         if ( SSL_accept(clientssl) < 0 )
                 err("SSL Accept");
 
@@ -50,12 +50,12 @@ inline void daisy_client(int c_fd) {
         if (connect(p_fd, (struct sockaddr *)&paddr, sizeof(paddr)))
                 err("Could not connect to Apache.");
 
-        syslog(LOG_INFO, "Connection to Apache established.");
+        //syslog(LOG_INFO, "Connection to Apache established.");
 
 	/* pollfd setup */
 	CS.C.fd = c_fd;
 	CS.S.fd = p_fd;
-	CS.C.events = CS.S.events = POLLIN;
+	CS.C.events = CS.S.events = POLLIN | POLLERR | POLLHUP;
 
 	/* proxying */
 
@@ -63,7 +63,7 @@ inline void daisy_client(int c_fd) {
                 if ( -1 == poll((struct pollfd *)&CS, (nfds_t)2, 1000))
                         err("poll error?");
 
-                if(CS.C.revents == POLLIN) {
+                if(CS.C.revents & POLLIN) {
                         /* ssl read */
                         n = SSL_read(clientssl, framebuffer, READLEN);
 
@@ -71,12 +71,24 @@ inline void daisy_client(int c_fd) {
 				syslog(LOG_INFO, "client n was 0");
 				break;
 			}
+			if (n < 0) {
+				syslog(LOG_INFO, "client n < 0");
+				break;
+			}
 
 			/* plain write */
                         send(CS.S.fd, framebuffer, n, 0);
                 }
+		if(CS.C.revents & POLLERR) {
+			syslog(LOG_NOTICE, "POLLERR C");
+			break;
+		}
+		if(CS.C.revents & POLLHUP) {
+			syslog(LOG_NOTICE, "POLLHUP C");
+			break;
+		}
 
-                if(CS.S.revents == POLLIN) {
+                if(CS.S.revents & POLLIN) {
 			/* plain read */
                         n = recv(CS.S.fd, framebuffer, READLEN, 0);
 
@@ -84,10 +96,22 @@ inline void daisy_client(int c_fd) {
 				syslog(LOG_INFO, "server n was 0");
 				break;
 			}
+			if (n < 0) {
+				syslog(LOG_INFO, "server n < 0");
+				break;
+			}
 
                         /* ssl write */
                         SSL_write(clientssl, framebuffer, n);
                 }
+		if(CS.S.revents & POLLERR) {
+			syslog(LOG_NOTICE, "POLLERR S");
+			break;
+		}
+		if(CS.S.revents & POLLHUP) {
+			syslog(LOG_NOTICE, "POLLHUP S");
+			break;
+		}
         }
 
         syslog(LOG_NOTICE, "client disconnect.");
