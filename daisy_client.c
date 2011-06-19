@@ -68,11 +68,11 @@ inline void daisy_client(int c_fd) {
                         n = SSL_read(clientssl, framebuffer, READLEN);
 
 			if (n == 0) {
-				syslog(LOG_INFO, "client n was 0");
+				//syslog(LOG_INFO, "client n was 0");
 				break;
 			}
 			if (n < 0) {
-				syslog(LOG_INFO, "client n < 0");
+				//syslog(LOG_INFO, "client n < 0");
 				break;
 			}
 
@@ -80,11 +80,11 @@ inline void daisy_client(int c_fd) {
                         send(CS.S.fd, framebuffer, n, 0);
                 }
 		if(CS.C.revents & POLLERR) {
-			syslog(LOG_NOTICE, "POLLERR C");
+			//syslog(LOG_NOTICE, "POLLERR C");
 			break;
 		}
 		if(CS.C.revents & POLLHUP) {
-			syslog(LOG_NOTICE, "POLLHUP C");
+			//syslog(LOG_NOTICE, "POLLHUP C");
 			break;
 		}
 
@@ -93,11 +93,11 @@ inline void daisy_client(int c_fd) {
                         n = recv(CS.S.fd, framebuffer, READLEN, 0);
 
 			if (n == 0) {
-				syslog(LOG_INFO, "server n was 0");
+				//syslog(LOG_INFO, "server n was 0");
 				break;
 			}
 			if (n < 0) {
-				syslog(LOG_INFO, "server n < 0");
+				//syslog(LOG_INFO, "server n < 0");
 				break;
 			}
 
@@ -105,16 +105,16 @@ inline void daisy_client(int c_fd) {
                         SSL_write(clientssl, framebuffer, n);
                 }
 		if(CS.S.revents & POLLERR) {
-			syslog(LOG_NOTICE, "POLLERR S");
+			//syslog(LOG_NOTICE, "POLLERR S");
 			break;
 		}
 		if(CS.S.revents & POLLHUP) {
-			syslog(LOG_NOTICE, "POLLHUP S");
+			//syslog(LOG_NOTICE, "POLLHUP S");
 			break;
 		}
         }
 
-        syslog(LOG_NOTICE, "client disconnect.");
+        //syslog(LOG_NOTICE, "client disconnect.");
         close(c_fd);
         close(p_fd);
 

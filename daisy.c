@@ -33,28 +33,21 @@ int daisybusinessmodel(void) {
 
 	if ( NULL == ( standardinput = BIO_new_fp(stdin, BIO_FLAGS_READ | BIO_NOCLOSE ) ) )
                 err("Error adapting BIO to standard input.");
-	syslog(LOG_NOTICE, "BIO adapted.");
 
 	ssl_key = EVP_PKEY_new();
-	syslog(LOG_NOTICE, "new EVP_PKEY.");
 	PEM_read_bio_PrivateKey(standardinput, &ssl_key, 0, "");
-	syslog(LOG_NOTICE, "read key.");
 	PEM_read_bio_X509(standardinput, &ssl_certificate, 0, 0);
-	syslog(LOG_NOTICE, "read crt.");
 
 	if(!ssl_key || !ssl_certificate )
 		err("cert/key trouble");
-	syslog(LOG_NOTICE, "No cert/key trouble.");
 
 	/* server SSL setup */
 
 	if ( ! ( ssl_ctx = SSL_CTX_new(SSLv23_server_method() ) ) ) 
 		err("Trouble initializing the server SSL context.");
-	syslog(LOG_DEBUG, "Initialized the context.");
 
 	assert(SSL_CTX_use_certificate(ssl_ctx, ssl_certificate));
 	assert(SSL_CTX_use_PrivateKey(ssl_ctx, ssl_key));
-	syslog(LOG_DEBUG, "The context is use certificate.");
 
 	/* Listener setup */
 
@@ -68,7 +61,7 @@ int daisybusinessmodel(void) {
 	assert(!listen(s, 1024));
 
 	/* We seem to be ready to go */
-	syslog(LOG_NOTICE, "I'm yo' huckleberry.");
+	syslog(LOG_NOTICE, "Listening.");
 
 	for(;;) {
 		c = accept(s, NULL, NULL);
@@ -83,7 +76,6 @@ int daisybusinessmodel(void) {
 		}
 
 		/* -- PARENT -- I am the parent */
-		syslog(LOG_INFO, "Client shot off into space.");
 		close(c);
 	}
 
