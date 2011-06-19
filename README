@@ -6,5 +6,5 @@ cat pem | ./daisyd
 
 hard coded to listen on *:5000 and proxy to an httpd on localhost at 127.128.129.1:80. 
 
-it probably only works on Intel & Linux, and assuming a pretty loose definition of works! seems to go terribly wrong somehow under much load. just a proof of concept.
+Intel & Linux
 
