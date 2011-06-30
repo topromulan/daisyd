@@ -1,10 +1,5 @@
-simple forking ssl terminating proxy which was the last homework from an openssl class.
+Daisy v1.0
+An SSL Terminating Proxy
 
-put your cert & key in 'pem'
-
-cat pem | ./daisyd
-
-hard coded to listen on *:5000 and proxy to an httpd on localhost at 127.128.129.1:80. 
-
-Intel & Linux
+./daisyd
 

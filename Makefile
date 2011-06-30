@@ -8,7 +8,7 @@ daisyd: daisyd.o daisy.o daisy_client.o daisy_catch_sigchld.o err.o
 
 
 clean:
-	rm -f *.o daisyd
+	rm -f *.o *.gcno *.gcda daisyd
 
 
 backup:

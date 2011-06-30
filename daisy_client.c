@@ -3,7 +3,8 @@
 #include "daisy.h"
 #include "err.h"
 
-inline void daisy_client(int c_fd) {
+inline void daisy_client(int c_fd, SSL_CTX *ssl_ctx,
+		 struct sockaddr_in *p_addr) {
 	
 	/* Client/Server pair */
 	struct {
@@ -39,9 +40,9 @@ inline void daisy_client(int c_fd) {
         if(!clientssl || !clientBIO)
                 err("ssl trouble");
 
-        /* Proxy socket setup. 80 % 256 * 256 + 80 / 256 */
+        /* Proxy socket setup. */
         p_fd = socket(AF_INET, SOCK_STREAM, 0);
-        paddr.sin_port = 20480;
+	paddr.sin_port = PORT_PROXY % 256 * 256 + PORT_PROXY / 256;
 
         paddr.sin_addr.s_addr = (in_addr_t)25264255;
         paddr.sin_family = AF_INET;

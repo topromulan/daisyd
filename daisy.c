@@ -2,66 +2,44 @@
 #include "daisy.h"
 #include "err.h"
 
-EVP_PKEY *ssl_key = NULL;
-X509 *ssl_certificate = NULL;
+void daisy_ssl_init(void);
+void daisy_load_cert(char *path, EVP_PKEY **ssl_key, X509 **ssl_certificate);
+int daisy_listener_setup(int listen_port);
 
-SSL_CTX *ssl_ctx = NULL;
-
-int daisybusinessmodel(void) {
+void daisybusinessmodel(char *cert_file, int listen_port, 
+		struct sockaddr_in *proxy_addr) {
 
 	/* The listening socket information */
 	int s;
-	struct sockaddr_in saddr;
 
 	/* Client socket information */
 	int c;
 
 	/* The standard input to get the certificate read from */
-	BIO *standardinput = NULL;
 
-	/* General OpenSSL init not entirely clear if all of these needed..
-		The ones commented are known/needed */
-	SSL_library_init(); /* helps alleviate SSL_R_LIBRARY_HAS_NO_CIPHERS */
-	CRYPTO_malloc_init();
-	ERR_load_crypto_strings();
-	SSL_load_error_strings(); /* No more "reason 193!" hehe */
-	OpenSSL_add_all_ciphers();
-	OpenSSL_add_all_digests();
-	OpenSSL_add_all_algorithms();
+	EVP_PKEY *ssl_key = NULL;
+	X509 *ssl_certificate = NULL;
 
-	/* Scene 1: Prepare stdin BIO for certificate read. */
+	SSL_CTX *ssl_ctx = NULL;
 
-	if ( NULL == ( standardinput = BIO_new_fp(stdin, BIO_FLAGS_READ | BIO_NOCLOSE ) ) )
-                err("Error adapting BIO to standard input.");
+	/* SSL setup */
 
-	ssl_key = EVP_PKEY_new();
-	PEM_read_bio_PrivateKey(standardinput, &ssl_key, 0, "");
-	PEM_read_bio_X509(standardinput, &ssl_certificate, 0, 0);
+	daisy_ssl_init();
+	daisy_load_cert(cert_file, &ssl_key, &ssl_certificate);
 
-	if(!ssl_key || !ssl_certificate )
-		err("cert/key trouble");
+	ssl_ctx = SSL_CTX_new( SSLv23_server_method() );
 
-	/* server SSL setup */
-
-	if ( ! ( ssl_ctx = SSL_CTX_new(SSLv23_server_method() ) ) ) 
+	if ( ! ssl_ctx )
 		err("Trouble initializing the server SSL context.");
 
-	assert(SSL_CTX_use_certificate(ssl_ctx, ssl_certificate));
-	assert(SSL_CTX_use_PrivateKey(ssl_ctx, ssl_key));
+	SSL_CTX_use_certificate(ssl_ctx, ssl_certificate);
+	SSL_CTX_use_PrivateKey(ssl_ctx, ssl_key);
 
 	/* Listener setup */
 
-	s = socket(AF_INET, SOCK_STREAM, 0);
+	s = daisy_listener_setup(listen_port);
 
-	saddr.sin_port = 34835; /* 5000 % 256 * 256 + 5000 / 256 */
-	saddr.sin_addr.s_addr = (in_addr_t)0;
-
-	assert(!bind(s, (struct sockaddr *)&saddr, sizeof(struct sockaddr_in)));
-
-	assert(!listen(s, 1024));
-
-	/* We seem to be ready to go */
-	syslog(LOG_NOTICE, "Listening.");
+	/* Main loop */
 
 	for(;;) {
 		c = accept(s, NULL, NULL);
@@ -75,14 +53,67 @@ int daisybusinessmodel(void) {
 			break;
 		}
 
-		/* -- PARENT -- I am the parent */
+		/* -- PARENT -- */
 		close(c);
 	}
 
 	close(s);
 
-	daisy_client(c);
+	daisy_client(c, ssl_ctx, proxy_addr);
 
-	return 0;
+	return;
 }
 
+void daisy_ssl_init(void) {
+
+	/* General OpenSSL init */
+	SSL_library_init(); /* helps alleviate SSL_R_LIBRARY_HAS_NO_CIPHERS */
+	CRYPTO_malloc_init();
+	ERR_load_crypto_strings();
+	SSL_load_error_strings(); /* No more "reason 193!" */
+	OpenSSL_add_all_ciphers();
+	OpenSSL_add_all_digests();
+	OpenSSL_add_all_algorithms();
+
+
+}
+
+
+void daisy_load_cert(char *path, EVP_PKEY **ssl_key, X509 **ssl_certificate) {
+
+	BIO *cert_input = NULL;
+
+	if ( ! strcmp(path, "-") )
+		cert_input = BIO_new_fp(stdin, BIO_FLAGS_READ | BIO_NOCLOSE );
+	else 
+		cert_input = BIO_new_file(path, "r" );
+
+	if ( !cert_input )
+                	err("Error, setting up BIO.");
+
+	*ssl_key = EVP_PKEY_new();
+	PEM_read_bio_PrivateKey(cert_input, ssl_key, 0, "");
+	PEM_read_bio_X509(cert_input, ssl_certificate, 0, 0);
+
+	if(!ssl_key || !ssl_certificate )
+		err("cert/key trouble");
+}
+
+int daisy_listener_setup(int listen_port) {
+
+	int s;
+	struct sockaddr_in saddr;
+
+	s = socket(AF_INET, SOCK_STREAM, 0);
+
+	saddr.sin_port = listen_port % 256 * 256 + listen_port / 256;
+	saddr.sin_addr.s_addr = (in_addr_t)0;
+
+	assert(!bind(s, (struct sockaddr *)&saddr, sizeof(struct sockaddr_in)));
+
+	assert(!listen(s, 1024));
+
+	syslog(LOG_NOTICE, "Listening.");
+
+	return s;
+}
