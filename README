@@ -1,11 +1,20 @@
 Daisy v1.0
 An SSL Terminating Proxy
+2011-06-30 
+by Dale Anderson
+dra@redevised.net
+
+https://github.com/topromulan/daisyd
 
 -s = path to cert/key file, "-" for stdin.
 -a = http daemon address
 -p = http daemon port
 -l = listening port
 
+make
+
 ./daisyd -s pem -a 127.128.129.1 -p 80 -l 5000
 
 curl -k -sD- -o/dev/null https://daisy:5000/tsunami.jpeg
+
+siege -c 325 https://daisy:5000/tsunami.jpeg
