@@ -1,5 +1,11 @@
 Daisy v1.0
 An SSL Terminating Proxy
 
-./daisyd
+-s = path to cert/key file, "-" for stdin.
+-a = http daemon address
+-p = http daemon port
+-l = listening port
 
+./daisyd -s pem -a 127.128.129.1 -p 80 -l 5000
+
+curl -k -sD- -o/dev/null https://daisy:5000/tsunami.jpeg

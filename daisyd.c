@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
 
 	sigchld_handling();
 
-	if ( fork() )
+	if ( ! fork() )
 		daisybusinessmodel(cert_file, listen_port, &p_addr);
 
 	return 0;
