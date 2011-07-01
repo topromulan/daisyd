@@ -61,13 +61,17 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	p_addr.sin_port = proxy_port;
+	p_addr.sin_port = htons(proxy_port);
 	p_addr.sin_addr.s_addr = proxy_address;
+	p_addr.sin_family = AF_INET;
+
+        syslog(LOG_NOTICE, "proxy port %d = %d", proxy_port, p_addr.sin_port);
+        syslog(LOG_NOTICE, "proxy address %d ", proxy_address);
 
 	sigchld_handling();
 
 	if ( ! fork() )
-		daisybusinessmodel(cert_file, listen_port, &p_addr);
+		daisy_server(cert_file, listen_port, &p_addr);
 
 	return 0;
 }

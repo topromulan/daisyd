@@ -15,9 +15,8 @@ inline void daisy_client(int c_fd, SSL_CTX *ssl_ctx,
         SSL *clientssl = NULL;
         BIO *clientBIO = NULL;
 
-        /* The proxy socket information */
+        /* The proxy socket */
         int p_fd;
-        struct sockaddr_in paddr;
 
 	/* Used in server loop. */
 	char framebuffer[FRAMEBUFFER];
@@ -42,13 +41,9 @@ inline void daisy_client(int c_fd, SSL_CTX *ssl_ctx,
 
         /* Proxy socket setup. */
         p_fd = socket(AF_INET, SOCK_STREAM, 0);
-	paddr.sin_port = PORT_PROXY % 256 * 256 + PORT_PROXY / 256;
-
-        paddr.sin_addr.s_addr = (in_addr_t)25264255;
-        paddr.sin_family = AF_INET;
 
         /* connect p to apache */
-        if (connect(p_fd, (struct sockaddr *)&paddr, sizeof(paddr)))
+        if (connect(p_fd, (struct sockaddr *)p_addr, sizeof(*p_addr)))
                 err("Could not connect to Apache.");
 
         //syslog(LOG_INFO, "Connection to Apache established.");

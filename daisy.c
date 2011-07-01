@@ -6,7 +6,7 @@ void daisy_ssl_init(void);
 void daisy_load_cert(char *path, EVP_PKEY **ssl_key, X509 **ssl_certificate);
 int daisy_listener_setup(int listen_port);
 
-void daisybusinessmodel(char *cert_file, int listen_port, 
+void daisy_server(char *cert_file, int listen_port, 
 		struct sockaddr_in *proxy_addr) {
 
 	/* The listening socket information */
